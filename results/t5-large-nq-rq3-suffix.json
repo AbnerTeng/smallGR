@@ -1,0 +1,101 @@
+{
+  "model": "google-t5/t5-large",
+  "dataset": "nq",
+  "semantic_id": "RQ9 prefix levels 0–2 plus deterministic prefix-local collision suffix",
+  "pseudo_queries": true,
+  "source_repository": "~/git/t5_gr",
+  "training_config_source": "outputs/2026-09-23/03-33-20/.hydra/config.yaml",
+  "training_manifest_source": "checkpoints/nq-t5-large-rq9-prefix3-collision-suffix-dsi-qg-e10-s42/training_manifest.json",
+  "training": {
+    "shared_model_instances": 1,
+    "multi_view_enabled": false,
+    "n_views": 1,
+    "n_train_examples": 949645,
+    "n_eval_examples": 15572,
+    "configured_epochs": 10,
+    "completed_epochs": 10,
+    "optimizer_steps": 74200,
+    "world_size": 1,
+    "processed_input_tokens_local": 259543680,
+    "processed_target_tokens_local": 47482250,
+    "processed_tokens_local": 307025930,
+    "train_metrics": {
+      "train_runtime": 67123.6159,
+      "train_samples_per_second": 141.477,
+      "train_steps_per_second": 1.105,
+      "total_flos": 6221558528065536000,
+      "train_loss": 0.7060693577357701,
+      "epoch": 10
+    }
+  },
+  "selected_checkpoint": {
+    "step": 68000,
+    "selection_metric": "validation_hits@10",
+    "selection_value": 0.8359,
+    "source": "checkpoints/nq-t5-large-rq9-prefix3-collision-suffix-dsi-qg-e10-s42/checkpoint-68000/trainer_state.json",
+    "epoch": 9.1644371061765
+  },
+  "validation": {
+    "source": "checkpoints/nq-t5-large-rq9-prefix3-collision-suffix-dsi-qg-e10-s42/checkpoint-68000/trainer_state.json",
+    "split": "validation",
+    "n_queries": 15572,
+    "beams": 10,
+    "metrics": {
+      "epoch": 9.1644371061765,
+      "eval_hits@1": 0.6357,
+      "eval_hits@10": 0.8359,
+      "eval_hits@5": 0.8024,
+      "step": 68000
+    }
+  },
+  "test": [
+    {
+      "source": "outputs/gr/baselines/nq_rq9_prefix3_collision_suffix_dsi_qg_best68000_test_b100_compact.json",
+      "split": "test",
+      "n_queries": 7830,
+      "beams": 100,
+      "hit@1_rqid": 0.6363984674329501,
+      "recall@1_doc": 0.6363984674329501,
+      "hit@10_rqid": 0.8324393358876118,
+      "recall@10_doc": 0.8324393358876118,
+      "hit@100_rqid": 0.91213282247765,
+      "recall@100_doc": 0.91213282247765,
+      "mrr@10_rqid": 0.7059186279875921,
+      "mrr@10_doc": 0.7059186279875921,
+      "ndcg@10_doc": 0.7367769200705419,
+      "unique_l1@10_beams": 3.229757343550447,
+      "oracle_l1_coverage@10": 0.9338441890166028,
+      "oracle_l2_coverage@10": 0.8642401021711367,
+      "ndcg@100_doc": 0.753489669916856,
+      "unique_l1@100_beams": 12.210855683269477,
+      "oracle_l1_coverage@100": 0.9733077905491698,
+      "oracle_l2_coverage@100": 0.9318007662835249,
+      "decode_latency_ms_per_query": 24.38546594227563,
+      "decode_throughput_qps": 41.008033324733795
+    },
+    {
+      "source": "outputs/gr/baselines/nq_rq9_prefix3_collision_suffix_dsi_qg_best68000_test_b300_compact.json",
+      "split": "test",
+      "n_queries": 7830,
+      "beams": 300,
+      "hit@1_rqid": 0.6369093231162196,
+      "recall@1_doc": 0.6369093231162196,
+      "hit@10_rqid": 0.8320561941251596,
+      "recall@10_doc": 0.8320561941251596,
+      "hit@100_rqid": 0.9117496807151979,
+      "recall@100_doc": 0.9117496807151979,
+      "mrr@10_rqid": 0.7062249386770448,
+      "mrr@10_doc": 0.7062249386770448,
+      "ndcg@10_doc": 0.7369274238946819,
+      "unique_l1@10_beams": 3.2337164750957856,
+      "oracle_l1_coverage@10": 0.9338441890166028,
+      "oracle_l2_coverage@10": 0.8636015325670499,
+      "ndcg@100_doc": 0.7536930990419466,
+      "unique_l1@100_beams": 13.477394636015326,
+      "oracle_l1_coverage@100": 0.9744572158365262,
+      "oracle_l2_coverage@100": 0.933205619412516,
+      "decode_latency_ms_per_query": 28.9781526891969,
+      "decode_throughput_qps": 34.508755983358505
+    }
+  ]
+}
