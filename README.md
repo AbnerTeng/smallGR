@@ -88,6 +88,45 @@ The dependency overrides align Axolotl 0.12.2 with the Torch/Transformers stack 
 
 ## Prepare or transfer data
 
+### Hugging Face
+
+The complete dataset is available at [Abner0803/NQ320k-semid](https://huggingface.co/datasets/Abner0803/NQ320k-semid).
+
+| Split | Repository file | Rows |
+| --- | --- | ---: |
+| Train | `data/train.jsonl` | 949,645 |
+| Validation | `data/validation.jsonl` | 15,572 |
+| Test | `data/test.jsonl` | 7,830 |
+
+These are the original JSONL files, verified against the local SHA-256 checksums. The repository also includes the ID mapping, codebooks, and source manifest under `artifacts/`. The requested repository name contains NQ320k; the training split includes all 949,645 augmented pairs.
+
+To populate `data/nq/` on another server without the reference repository:
+
+```python
+from pathlib import Path
+import shutil
+from huggingface_hub import hf_hub_download
+
+repo = "Abner0803/NQ320k-semid"
+revision = "ec8e17fe70dad47e1a6071eaeb38ade436c01ef0"
+root = Path("data/nq")
+root.mkdir(parents=True, exist_ok=True)
+
+files = {
+    **{f"data/{split}.jsonl": f"{split}.jsonl" for split in ("train", "validation", "test")},
+    **{f"artifacts/{name}": name for name in ("idx_to_rqid.json", "codebooks.npy", "manifest.json")},
+}
+for remote, name in files.items():
+    downloaded = hf_hub_download(repo, remote, repo_type="dataset", revision=revision)
+    shutil.copy2(downloaded, root / name)
+```
+
+For direct analysis, `load_dataset("Abner0803/NQ320k-semid")` returns all three splits. Its shared schema exposes the training-only missing `gt_rqid` field as null; `output` is the prediction target in every split.
+
+The uploader is reproducible with `bash scripts/upload_datasets.sh`; `--check` only inspects authentication and repository status. Verified publication details are saved in [results/huggingface_datasets.json](results/huggingface_datasets.json).
+
+### Import from the reference project
+
 Preparation imports existing artifacts from the reference project. It requires these directories under `--source-root`:
 
 ```text
@@ -101,7 +140,7 @@ bash scripts/run.sh prepare --source-root ~/git/t5_gr
 
 This creates `data/nq/` containing `train.jsonl`, `validation.jsonl`, `test.jsonl`, `idx_to_rqid.json`, `codebooks.npy`, and `manifest.json`. Preparation checks document-ID uniqueness, target/document alignment, and the training row count, and records split checksums. An existing output directory is refused; use `--output-dir` to select a fresh directory.
 
-**Data is git-ignored. Copy the complete `data/nq/` directory to the other server alongside the repository.** Git push/pull transfers the code, configs, and lockfile. Once the prepared data is copied, training and evaluation do not require the reference repository.
+**Data is git-ignored.** On another server, download it from Hugging Face using the recipe above or copy the complete `data/nq/` directory. Git push/pull transfers the code, configs, and lockfile. Prepared data allows training and evaluation without the reference repository.
 
 ## Train
 
