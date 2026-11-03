@@ -97,6 +97,30 @@ The dependency overrides align Axolotl 0.12.2 with the Torch/Transformers stack 
 
 ## Prepare or transfer data
 
+### Hugging Face
+
+The complete dataset is available at [Abner0803/NQ320k-semid](https://huggingface.co/datasets/Abner0803/NQ320k-semid).
+
+| Split | Repository file | Rows |
+| --- | --- | ---: |
+| Train | `data/train.jsonl` | 949,645 |
+| Validation | `data/validation.jsonl` | 15,572 |
+| Test | `data/test.jsonl` | 7,830 |
+
+These are the original JSONL files, verified against the local SHA-256 checksums. The repository also includes the ID mapping, codebooks, and source manifest under `artifacts/`. The requested repository name contains NQ320k; the training split includes all 949,645 augmented pairs.
+
+To populate `data/nq/` on another server without the reference repository:
+
+```bash
+bash scripts/run.sh prepare --dataset Abner0803/NQ320k-semid --output-dir data/nq
+```
+
+For direct analysis, `load_dataset("Abner0803/NQ320k-semid")` returns all three splits. Its shared schema exposes the training-only missing `gt_rqid` field as null; `output` is the prediction target in every split.
+
+The uploader is reproducible with `bash scripts/upload_datasets.sh`; `--check` only inspects authentication and repository status. Verified publication details are saved in [results/huggingface_datasets.json](results/huggingface_datasets.json).
+
+### Import from the reference project
+
 Preparation imports existing artifacts from the reference project. It requires these directories under `--source-root`:
 
 ```text
@@ -110,13 +134,7 @@ bash scripts/run.sh prepare --source-root ~/git/t5_gr
 
 This creates `data/nq/` containing `train.jsonl`, `validation.jsonl`, `test.jsonl`, `idx_to_rqid.json`, `codebooks.npy`, and `manifest.json`. Preparation checks document-ID uniqueness, target/document alignment, and the training row count, and records split checksums. An existing output directory is refused; use `--output-dir` to select a fresh directory.
 
-Alternatively, download the pinned Hugging Face dataset and artifacts:
-
-```bash
-bash scripts/run.sh prepare --dataset Abner0803/NQ320k-semid --output-dir data/nq
-```
-
-**Data is git-ignored. Prepare it from Hugging Face on the other server or copy the complete `data/nq/` directory alongside the repository.** Git push/pull transfers the code, configs, and lockfile. Once the data is prepared, training and evaluation do not require the reference repository.
+**Data is git-ignored.** On another server, prepare it from Hugging Face using the command above or copy the complete `data/nq/` directory. Git push/pull transfers the code, configs, and lockfile. Prepared data allows training and evaluation without the reference repository.
 
 ## Train
 

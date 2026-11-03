@@ -1,0 +1,21 @@
+{
+  "repo_id": "Abner0803/NQ320k-semid",
+  "url": "https://huggingface.co/datasets/Abner0803/NQ320k-semid",
+  "revision": "ec8e17fe70dad47e1a6071eaeb38ade436c01ef0",
+  "private": false,
+  "splits": {
+    "train": 949645,
+    "validation": 15572,
+    "test": 7830
+  },
+  "source_sha256": {
+    "data/train.jsonl": "a7d156c1c8c6848bb02103922c5321f3278b7c0488183f235b1eba669011520a",
+    "data/validation.jsonl": "f53d3efc6f694d1b21a1581458ca9e5eefdecfc4a66c1ebf4149b4a8da7373c5",
+    "data/test.jsonl": "1af61b69dbedf17bb7cecde6e630c2707ded66078a972d94ecf6dbf26d27632f"
+  },
+  "remote_verification": "passed",
+  "deleted_superseded_repositories": [
+    "Abner0803/NQ320k-train-semid",
+    "Abner0803/NQ320k-test-semid"
+  ]
+}
