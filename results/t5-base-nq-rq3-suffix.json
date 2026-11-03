@@ -1,0 +1,50 @@
+{
+  "model": "google-t5/t5-base",
+  "parameters": 223668480,
+  "dataset": {
+    "dataset": "Abner0803/NQ320k-semid",
+    "revision": "ec8e17fe70dad47e1a6071eaeb38ade436c01ef0"
+  },
+  "data_manifest_source": "/work/abner0803/smallGR/data/nq-t5-base/manifest.json",
+  "results_source": "/work/abner0803/smallGR/checkpoints/parallel/410441/t5-base/results.json",
+  "trainer_state_source": "/work/abner0803/smallGR/checkpoints/parallel/410441/t5-base/trainer_state.json",
+  "rq_init": "projected",
+  "projection_seed": 42,
+  "training": {
+    "completed_epochs": 10.0,
+    "optimizer_steps": 74200,
+    "n_train_examples": 949645,
+    "metrics": {
+      "train_runtime": 23333.5121,
+      "train_samples_per_second": 407.037,
+      "train_steps_per_second": 3.18,
+      "total_flos": 1.749923507096617e+18,
+      "train_loss": 1.1676207932629032,
+      "memory/max_mem_active(gib)": 16.98,
+      "memory/max_mem_allocated(gib)": 16.98,
+      "memory/device_mem_reserved(gib)": 22.14,
+      "epoch": 10.0,
+      "step": 74200
+    }
+  },
+  "selected_checkpoint": {
+    "step": 70000,
+    "epoch": 9.434006132695353,
+    "selection_metric": "validation_hits@10",
+    "selection_value": 0.7885306961212433,
+    "source": "/work/abner0803/smallGR/checkpoints/parallel/410441/t5-base/checkpoint-70000/trainer_state.json"
+  },
+  "validation": {
+    "split": "validation",
+    "n_queries": 15572,
+    "beams": 10,
+    "metrics": {
+      "eval_hits@1": 0.5469432314410481,
+      "eval_hits@5": 0.7464680195222194,
+      "eval_hits@10": 0.7885306961212433
+    }
+  },
+  "test": {
+    "status": "pending"
+  }
+}

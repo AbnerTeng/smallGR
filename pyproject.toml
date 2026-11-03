@@ -8,7 +8,8 @@ version = "0.1.0"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "axolotl==0.12.2",
-    "torch==2.8.0",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
     "transformers==4.57.1",
     "datasets==4.5.0",
     "accelerate==1.12.0",
@@ -24,7 +25,7 @@ include = ["src*"]
 
 [tool.uv]
 override-dependencies = [
-    "torch==2.8.0",
+    "torch==2.6.0",
     "transformers==4.57.1",
     "datasets==4.5.0",
     "accelerate==1.12.0",
@@ -32,8 +33,8 @@ override-dependencies = [
     "trl==0.26.1",
     "numpy==2.2.0",
     "bitsandbytes==0.49.0",
-    "xformers==0.0.32.post1",
-    "triton==3.4.0",
+    "xformers==0.0.29.post3",
+    "triton==3.2.0",
     "torchao==0.9.0",
     "pydantic==2.12.5",
     "scikit-learn==1.8.0",
@@ -41,10 +42,11 @@ override-dependencies = [
 ]
 
 [tool.uv.sources]
-torch = { index = "pytorch-cu128" }
-xformers = { index = "pytorch-cu128" }
+torch = { index = "pytorch-cu124" }
+torchvision = { index = "pytorch-cu124" }
+xformers = { index = "pytorch-cu124" }
 
 [[tool.uv.index]]
-name = "pytorch-cu128"
-url = "https://download.pytorch.org/whl/cu128"
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
 explicit = true

@@ -76,6 +76,9 @@ def train(args):
         "parameters": sum(p.numel() for p in model.parameters()),
         "rq_init": raw["rq_init"],
         "projection_seed": raw["rq_projection_seed"],
+        "training_config": raw,
+        "data_manifest": json.loads((Path(raw["rq_data_dir"]) / "manifest.json").read_text()),
+        "best_model_checkpoint": trainer.state.best_model_checkpoint,
         "smoke": args.smoke,
         "metrics": metrics,
         "train_log": trainer.state.log_history,
@@ -132,6 +135,9 @@ def main():
     prep.add_argument("--source-root", default="~/git/t5_gr")
     prep.add_argument("--output-dir", default="data/nq")
     prep.add_argument("--smoke", action="store_true")
+    prep.add_argument("--dataset", help="Hugging Face repository containing data/ and artifacts/")
+    from .data import HF_REVISION
+    prep.add_argument("--revision", default=HF_REVISION)
     training = sub.add_parser("train")
     training.add_argument("--config", default="configs/t5-small.yaml")
     training.add_argument("--data-dir")
@@ -151,7 +157,7 @@ def main():
     args = parser.parse_args()
     if args.command == "prepare":
         from .data import prepare
-        prepare(args.source_root, args.output_dir, args.smoke)
+        prepare(args.source_root, args.output_dir, args.smoke, args.dataset, args.revision)
     elif args.command == "train":
         train(args)
     elif args.command == "evaluate":

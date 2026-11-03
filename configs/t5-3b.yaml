@@ -1,0 +1,56 @@
+base_model: google-t5/t5-3b
+output_dir: checkpoints/nq-t5-3b-rq3-suffix-pseudo-s42
+wandb_name: nq-t5-3b-rq3-suffix-pseudo-s42
+type_of_model: T5ForConditionalGeneration
+plugins:
+  - src.axolotl_plugin.RQPlugin
+rq_data_dir: data/nq
+rq_init: projected
+rq_projection_seed: 42
+rq_eval_beams: 10
+datasets:
+  - path: data/nq/train.jsonl
+    type: completion
+test_datasets:
+  - path: data/nq/validation.jsonl
+    type: completion
+dataset_num_proc: 1
+val_set_size: 0
+sequence_len: 512
+sample_packing: false
+eval_sample_packing: false
+pad_to_sequence_len: false
+resize_token_embeddings_to_32x: false
+mean_resizing_embeddings: true
+micro_batch_size: 32
+gradient_accumulation_steps: 4
+eval_batch_size: 8
+num_epochs: 10
+learning_rate: 0.0003
+lr_scheduler: cosine
+warmup_ratio: 0.10
+optimizer: adamw_torch
+weight_decay: 0.01
+max_grad_norm: 0.5
+bf16: true
+fp16: false
+tf32: false
+flash_attention: false
+sdp_attention: false
+attn_implementation: eager
+gradient_checkpointing: true
+eval_strategy: steps
+eval_steps: 2000
+save_strategy: best
+save_total_limit: 1
+save_safetensors: true
+logging_steps: 100
+dataloader_num_workers: 4
+dataloader_drop_last: false
+load_best_model_at_end: true
+metric_for_best_model: eval_hits@10
+greater_is_better: true
+seed: 42
+wandb_project: smallgr-nq
+wandb_log_model: "false"
+strict: false

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+export XDG_CACHE_HOME=/work/abner0803/.cache
+export HF_HOME="$XDG_CACHE_HOME/huggingface"
+export PIP_CACHE_DIR="$XDG_CACHE_HOME/pip"
+export UV_CACHE_DIR="$XDG_CACHE_HOME/uv"
+export UV_PYTHON_INSTALL_DIR=/work/abner0803/.local/share/uv/python
+export TORCH_HOME="$XDG_CACHE_HOME/torch"
+export SMALLGR_VENV=/work/abner0803/venvs/smallgr-py312
+export UV_PROJECT_ENVIRONMENT="$SMALLGR_VENV"
+export WANDB_CACHE_DIR="$XDG_CACHE_HOME/wandb"
+export WANDB_CONFIG_DIR=/work/abner0803/.config/wandb
+export WANDB_DATA_DIR=/work/abner0803/wandb

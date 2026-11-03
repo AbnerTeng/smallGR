@@ -7,32 +7,46 @@ import numpy as np
 
 DATASET = "nq_rq9_prefix3_collision_suffix_dsi_qg_single_route_s42"
 RQ = "nq_rq9_prefix3_collision_suffix_s42"
+HF_DATASET = "Abner0803/NQ320k-semid"
+HF_REVISION = "ec8e17fe70dad47e1a6071eaeb38ade436c01ef0"
 
 
-def prepare(source_root, output_dir, smoke=False):
+def prepare(source_root, output_dir, smoke=False, dataset=None, revision=HF_REVISION):
     source_root, output_dir = Path(source_root).expanduser(), Path(output_dir)
-    source = source_root / "data/gr" / DATASET
-    rq = source_root / "data/rq_runs" / RQ
-    manifest = json.loads((source / "manifest.json").read_text())
+    expected_files = None
+    if dataset:
+        from huggingface_hub import snapshot_download
+
+        snapshot = Path(snapshot_download(
+            dataset, repo_type="dataset", revision=revision,
+            allow_patterns=["data/*.jsonl", "artifacts/*"],
+        ))
+        source, rq = snapshot / "data", snapshot / "artifacts"
+        uploaded = json.loads((rq / "manifest.json").read_text())
+        manifest, expected_files = uploaded["source"], uploaded["files"]
+        codebook_name = "codebooks.npy"
+        split_names = ("train.jsonl", "validation.jsonl", "test.jsonl")
+    else:
+        source = source_root / "data/gr" / DATASET
+        rq = source_root / "data/rq_runs" / RQ
+        manifest = json.loads((source / "manifest.json").read_text())
+        codebook_name = "rq_codebooks_semantic3.npy"
+        split_names = ("train.jsonl", "validation_expanded.jsonl", "test_expanded.jsonl")
     routes = json.loads((rq / "idx_to_rqid.json").read_text())
     if len(routes) != manifest["n_documents"] or len(routes) != len(set(routes)):
         raise ValueError("Document IDs must be unique and cover the corpus")
     if manifest["training_sources"]["pseudo_query"] <= 0:
         raise ValueError("Expected pseudo-query training examples")
-    codebooks = np.load(rq / "rq_codebooks_semantic3.npy")
+    codebooks = np.load(rq / codebook_name)
     if codebooks.shape != (3, 256, 1024):
         raise ValueError(f"Unexpected codebook shape: {codebooks.shape}")
     if output_dir.exists():
         raise FileExistsError(f"Choose a new output directory: {output_dir}")
     output_dir.mkdir(parents=True)
     shutil.copy2(rq / "idx_to_rqid.json", output_dir / "idx_to_rqid.json")
-    shutil.copy2(rq / "rq_codebooks_semantic3.npy", output_dir / "codebooks.npy")
+    shutil.copy2(rq / codebook_name, output_dir / "codebooks.npy")
     copied = {}
-    for src_name, dst_name in [
-        ("train.jsonl", "train.jsonl"),
-        ("validation_expanded.jsonl", "validation.jsonl"),
-        ("test_expanded.jsonl", "test.jsonl"),
-    ]:
+    for src_name, dst_name in zip(split_names, ("train.jsonl", "validation.jsonl", "test.jsonl")):
         destination = output_dir / dst_name
         digest = hashlib.sha256()
         count = 0
@@ -57,6 +71,8 @@ def prepare(source_root, output_dir, smoke=False):
                 digest.update(line.encode())
                 count += 1
         copied[dst_name] = {"rows": count, "sha256": digest.hexdigest()}
+        if expected_files and not smoke and copied[dst_name] != expected_files[dst_name]:
+            raise ValueError(f"Row count or checksum differs from Hugging Face manifest: {dst_name}")
     expected = manifest["n_train_examples"]
     if not smoke and copied["train.jsonl"]["rows"] != expected:
         raise ValueError("Training row count differs from source manifest")
@@ -66,6 +82,8 @@ def prepare(source_root, output_dir, smoke=False):
         "smoke_examples_per_training_source": 4 if smoke else None,
         "files": copied,
     }
+    if dataset:
+        result["huggingface"] = {"dataset": dataset, "revision": snapshot.name}
     (output_dir / "manifest.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result, indent=2))
     return output_dir

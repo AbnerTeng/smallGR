@@ -1,6 +1,6 @@
 # smallGR
 
-Compare T5-small and T5-base against T5-Large on Natural Questions generative retrieval, using the same document IDs and training pairs. Fine-tuning uses Axolotl; experiment tracking uses Weights & Biases.
+Compare T5-small, T5-base, T5-Large, and T5-3B on Natural Questions generative retrieval, using the same document IDs and training pairs. Fine-tuning uses Axolotl; experiment tracking uses Weights & Biases.
 Source code lives in `src/`. The launcher invokes `python -m src`, and the Axolotl configs load `src.axolotl_plugin.RQPlugin`.
 
 
@@ -31,20 +31,27 @@ Training includes real queries, document text, and pseudo queries:
 | T5-small | [configs/t5-small.yaml](configs/t5-small.yaml) | 512 |
 | T5-base | [configs/t5-base.yaml](configs/t5-base.yaml) | 768 |
 | T5-Large | [configs/t5-large.yaml](configs/t5-large.yaml) | 1,024 |
+| T5-3B | [configs/t5-3b.yaml](configs/t5-3b.yaml) | 1,024 |
 
-The defaults match the reference training schedule: 10 epochs, learning rate `3e-4`, cosine decay, 10% warmup, micro-batch 32, gradient accumulation 4, effective batch 128, and maximum input length 512. Parameters remain float32 with bf16 computation. Validation and checkpoint saving occur every 2,000 optimizer steps; the best checkpoint is selected by validation Hits@10.
+The defaults match the reference training schedule: 10 epochs, learning rate `3e-4`, cosine decay, 10% warmup, micro-batch 32, gradient accumulation 4, effective batch 128, and maximum input length 512. Parameters remain float32 with bf16 computation. Validation occurs every 2,000 optimizer steps; the best checkpoint is selected by validation Hits@10. Small, base, and large save every 2,000 steps. T5-3B saves when validation Hits@10 improves and retains one checkpoint, including optimizer state, to reduce storage use; it also enables gradient checkpointing and uses evaluation batches of 8.
 
 Evaluation uses 10-beam decoding constrained to the full document-ID trie and reports Hits@1, Hits@5, and Hits@10. The current evaluator supports one GPU.
 
 ### RQ embedding initialization
 
-The default `rq_init: projected` initializes the first three token namespaces from the reference codebooks. T5-small and T5-base use a fixed Gaussian projection, seeded with 42, from 1,024 dimensions to their embedding width. T5-Large uses the original codebook vectors. Vectors are normalized and scaled to the mean pretrained embedding norm. The suffix namespace retains the default newly added token initialization.
+The default `rq_init: projected` initializes the first three token namespaces from the reference codebooks. T5-small and T5-base use a fixed Gaussian projection, seeded with 42, from 1,024 dimensions to their embedding width. T5-Large and T5-3B use the original codebook vectors. Vectors are normalized and scaled to the mean pretrained embedding norm. The suffix namespace retains the default newly added token initialization.
 
-Projection introduces an initialization difference across model widths. To compare all three sizes with the default newly added token initialization, run each with `--init random` and a separate output directory.
+Projection introduces an initialization difference across model widths. To compare all four sizes with the default newly added token initialization, run each with `--init random` and a separate output directory.
 
 ## Performance comparison
 
 The reference T5-Large run uses the same NQ training data, pseudo queries, and RQ3 + collision-suffix IDs. It completed 10 epochs (74,200 optimizer steps); validation Hits@10 selected checkpoint 68,000, at approximately epoch 9.16. The saved reference metrics and original source paths are recorded in [results/t5-large-nq-rq3-suffix.json](results/t5-large-nq-rq3-suffix.json).
+
+T5-small completed 10 epochs (74,200 optimizer steps) on `Abner0803/NQ320k-semid`, with 61,016,576 parameters and projected codebook initialization (seed 42). Validation Hits@10 selected checkpoint 70,000, at approximately epoch 9.43. Training reported 10,621.79 seconds (about 2 hours 57 minutes), with peak allocated GPU memory of 5.53 GiB. The saved metrics, dataset revision, and source paths are recorded in [results/t5-small-nq-rq3-suffix.json](results/t5-small-nq-rq3-suffix.json).
+
+T5-base completed the same 10 epochs (74,200 optimizer steps), with 223,668,480 parameters and projected codebook initialization (seed 42). Validation Hits@10 selected checkpoint 70,000, at approximately epoch 9.43. Training reported 23,333.51 seconds (about 6 hours 29 minutes), with peak allocated GPU memory of 16.98 GiB. The saved metrics, dataset revision, and source paths are recorded in [results/t5-base-nq-rq3-suffix.json](results/t5-base-nq-rq3-suffix.json).
+
+T5-Large also completed the Axolotl pipeline in this repository: 10 epochs, 74,200 optimizer steps, and 738,688,000 parameters. Validation selected checkpoint 70,000 (epoch 9.43), with Hits@10 of 83.61%. Training reported 43,056.03 seconds (about 11 hours 58 minutes), with peak allocated GPU memory of 47.19 GiB. See [results/t5-large-axolotl-nq-rq3-suffix.json](results/t5-large-axolotl-nq-rq3-suffix.json). T5-3B full training is in progress; no final performance is available yet.
 
 ### Validation: 10 beams, 15,572 queries
 
@@ -52,28 +59,30 @@ All values below are percentages. This matches the decoding budget used by the c
 
 | Model | Full-training status | Hits@1 | Hits@5 | Hits@10 |
 | --- | --- | ---: | ---: | ---: |
-| T5-small | Pending; one-step smoke check passed | — | — | — |
-| T5-base | Pending; one-step smoke check passed | — | — | — |
-| T5-Large | Reference checkpoint 68,000 | 63.57 | 80.24 | 83.59 |
+| T5-small | Completed 10 epochs; checkpoint 70,000 | 33.23 | 54.03 | 60.30 |
+| T5-base | Completed 10 epochs; checkpoint 70,000 | 54.69 | 74.65 | 78.85 |
+| T5-Large (Axolotl) | Completed 10 epochs; checkpoint 70,000 | 63.41 | 80.33 | 83.61 |
+| T5-Large (reference) | Completed 10 epochs; checkpoint 68,000 | 63.57 | 80.24 | 83.59 |
+| T5-3B | Full training in progress | — | — | — |
 
 ### Held-out test: 7,830 queries
 
-The saved T5-Large test evaluations use larger beam budgets. All metrics are percentages; document recall and ID hit rates coincide because the four-token IDs are unique.
+The saved reference T5-Large test evaluations use larger beam budgets; these are not test results from the new Axolotl run. All metrics are percentages; document recall and ID hit rates coincide because the four-token IDs are unique.
 
 | Model | Beams | Hits@1 | Hits@10 | Hits@100 | MRR@10 | nDCG@10 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | T5-Large | 100 | 63.64 | 83.24 | 91.21 | 70.59 | 73.68 |
 | T5-Large | 300 | 63.69 | 83.21 | 91.17 | 70.62 | 73.69 |
 
-A 10-beam T5-Large test result was not found among the saved baseline artifacts. The current `evaluate` command uses 10 beams, so a direct test comparison requires evaluating every model with the same beam budget and split. T5-small and T5-base still need full training and held-out evaluation before their performance can be compared with these reference results.
+A 10-beam T5-Large test result was not found among the saved baseline artifacts. The current `evaluate` command uses 10 beams, so a direct test comparison requires evaluating every model with the same beam budget and split. T5-small, T5-base, and the Axolotl T5-Large have completed full training; their held-out test evaluations are pending.
 
 The reference run used the Transformers trainer in `t5_gr`; this repository uses Axolotl with the matched data and training schedule. Smaller models also use projected codebook embeddings, as described in [RQ embedding initialization](#rq-embedding-initialization). These implementation and initialization differences should remain explicit when reporting the comparison.
 
 ## Environment
 
-Run commands from the repository root. Python 3.12 is required. [pyproject.toml](pyproject.toml), [uv.lock](uv.lock), and [.python-version](.python-version) specify the environment; Torch and xformers use CUDA 12.8 wheels.
+Run commands from the repository root. Python 3.12 is required. [pyproject.toml](pyproject.toml), [uv.lock](uv.lock), and [.python-version](.python-version) specify the environment; Torch 2.6.0 and xformers use CUDA 12.4 wheels.
 
-On this machine, the launcher activates `~/git/rar/.venv`. To build an environment on another server:
+The launcher defaults to `~/git/rar/.venv`; Nano5 jobs use `/work/abner0803/venvs/smallgr-py312` through `SMALLGR_VENV`. To build an environment on another server:
 
 ```bash
 uv sync --locked
@@ -82,9 +91,9 @@ export SMALLGR_VENV="$PWD/.venv"
 wandb login
 ```
 
-`SMALLGR_VENV` overrides the launcher's environment path. The launcher explicitly sets `CUDA_VISIBLE_DEVICES=1`; adjust that line in [scripts/run.sh](scripts/run.sh) if the other server uses a different GPU index.
+`SMALLGR_VENV` overrides the launcher's environment path. Outside Slurm, the launcher sets `CUDA_VISIBLE_DEVICES=1`; inside Slurm it preserves the allocated GPU selection. Adjust that line in [scripts/run.sh](scripts/run.sh) if the other server uses a different GPU index.
 
-The dependency overrides align Axolotl 0.12.2 with the Torch/Transformers stack used for the local checks. Smoke tests ran in the shared `~/git/rar/.venv`, and lockfile consistency was checked. A fresh `uv sync` installation has not been tested locally.
+The dependency overrides align Axolotl 0.12.2 with the Torch/Transformers stack used on Nano5. The Nano5 environment completed small, base, and large training; the lockfile consistency and four retrieval-constraint tests also passed. For Nano5 setup, copy the repository under `/work/abner0803` and run `bash scripts/setup_nano5.sh small base large 3b` on a node with download access before submitting offline jobs.
 
 ## Prepare or transfer data
 
@@ -101,7 +110,13 @@ bash scripts/run.sh prepare --source-root ~/git/t5_gr
 
 This creates `data/nq/` containing `train.jsonl`, `validation.jsonl`, `test.jsonl`, `idx_to_rqid.json`, `codebooks.npy`, and `manifest.json`. Preparation checks document-ID uniqueness, target/document alignment, and the training row count, and records split checksums. An existing output directory is refused; use `--output-dir` to select a fresh directory.
 
-**Data is git-ignored. Copy the complete `data/nq/` directory to the other server alongside the repository.** Git push/pull transfers the code, configs, and lockfile. Once the prepared data is copied, training and evaluation do not require the reference repository.
+Alternatively, download the pinned Hugging Face dataset and artifacts:
+
+```bash
+bash scripts/run.sh prepare --dataset Abner0803/NQ320k-semid --output-dir data/nq
+```
+
+**Data is git-ignored. Prepare it from Hugging Face on the other server or copy the complete `data/nq/` directory alongside the repository.** Git push/pull transfers the code, configs, and lockfile. Once the data is prepared, training and evaluation do not require the reference repository.
 
 ## Train
 
@@ -110,15 +125,16 @@ bash scripts/run.sh train --config configs/t5-small.yaml
 bash scripts/run.sh train --config configs/t5-base.yaml
 ```
 
-An optional T5-Large run uses the same pipeline:
+T5-Large and T5-3B use the same pipeline:
 
 ```bash
 bash scripts/run.sh train --config configs/t5-large.yaml
+bash scripts/run.sh train --config configs/t5-3b.yaml
 ```
 
 Runs log online to the W&B project `smallgr-nq`. Override tracking with `--wandb-mode offline` or `--wandb-mode disabled`. Use `--data-dir` for prepared data stored elsewhere.
 
-The default output directories are `checkpoints/nq-t5-{small,base,large}-rq3-suffix-pseudo-s42/`. Each contains model/tokenizer files, Trainer checkpoints and state, and `results.json` with training logs, validation metrics, parameter count, and initialization settings.
+The default output directories are `checkpoints/nq-t5-{small,base,large,3b}-rq3-suffix-pseudo-s42/`. Each contains model/tokenizer files, Trainer checkpoints and state, and `results.json` with training logs, validation metrics, parameter count, and initialization settings.
 
 For an initialization ablation:
 
