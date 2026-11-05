@@ -1,0 +1,51 @@
+{
+  "model": "google-t5/t5-3b",
+  "parameters": 2852618240,
+  "dataset": {
+    "dataset": "Abner0803/NQ320k-semid",
+    "revision": "ec8e17fe70dad47e1a6071eaeb38ade436c01ef0"
+  },
+  "results_source": "/home/abner0803/smallGR-checkpoints/t5-3b-nq-20261103/results.json",
+  "trainer_state_source": "/home/abner0803/smallGR-checkpoints/t5-3b-nq-20261103/trainer_state.json",
+  "rq_init": "projected",
+  "projection_seed": 42,
+  "training": {
+    "completed_epochs": 10.0,
+    "optimizer_steps": 74200,
+    "n_train_examples": 949645,
+    "slurm_job_id": "435108",
+    "completed_at": "2026-11-04T23:38:25+08:00",
+    "metrics": {
+      "train_runtime": 112830.2311,
+      "train_samples_per_second": 84.176,
+      "train_steps_per_second": 0.658,
+      "total_flos": 2.4882925590037266e+19,
+      "train_loss": 0.5328143673251581,
+      "memory/max_mem_active(gib)": 53.2,
+      "memory/max_mem_allocated(gib)": 53.2,
+      "memory/device_mem_reserved(gib)": 65.43,
+      "epoch": 10.0,
+      "step": 74200
+    }
+  },
+  "best_model_checkpoint": null,
+  "validation": {
+    "split": "validation",
+    "n_queries": 15572,
+    "beams": 10,
+    "evaluated_step": 74200,
+    "checkpoint": "final model; best_model_checkpoint is null in saved results and trainer state",
+    "metrics": {
+      "eval_hits@1": 0.6735165681993321,
+      "eval_hits@5": 0.8199974312869253,
+      "eval_hits@10": 0.8501155920883637
+    }
+  },
+  "test": {
+    "status": "pending"
+  },
+  "wandb": {
+    "mode": "offline",
+    "run_id": "95s10gze"
+  }
+}

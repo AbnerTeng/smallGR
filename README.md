@@ -51,7 +51,9 @@ T5-small completed 10 epochs (74,200 optimizer steps) on `Abner0803/NQ320k-semid
 
 T5-base completed the same 10 epochs (74,200 optimizer steps), with 223,668,480 parameters and projected codebook initialization (seed 42). Validation Hits@10 selected checkpoint 70,000, at approximately epoch 9.43. Training reported 23,333.51 seconds (about 6 hours 29 minutes), with peak allocated GPU memory of 16.98 GiB. The saved metrics, dataset revision, and source paths are recorded in [results/t5-base-nq-rq3-suffix.json](results/t5-base-nq-rq3-suffix.json).
 
-T5-Large also completed the Axolotl pipeline in this repository: 10 epochs, 74,200 optimizer steps, and 738,688,000 parameters. Validation selected checkpoint 70,000 (epoch 9.43), with Hits@10 of 83.61%. Training reported 43,056.03 seconds (about 11 hours 58 minutes), with peak allocated GPU memory of 47.19 GiB. See [results/t5-large-axolotl-nq-rq3-suffix.json](results/t5-large-axolotl-nq-rq3-suffix.json). T5-3B full training is in progress; no final performance is available yet.
+T5-Large also completed the Axolotl pipeline in this repository: 10 epochs, 74,200 optimizer steps, and 738,688,000 parameters. Validation selected checkpoint 70,000 (epoch 9.43), with Hits@10 of 83.61%. Training reported 43,056.03 seconds (about 11 hours 58 minutes), with peak allocated GPU memory of 47.19 GiB. See [results/t5-large-axolotl-nq-rq3-suffix.json](results/t5-large-axolotl-nq-rq3-suffix.json).
+
+T5-3B completed 10 epochs (74,200 optimizer steps) with 2,852,618,240 parameters, using the same data and codebook initialization (seed 42). Job `435108` finished on November 4, 2026 at 23:38 (Asia/Taipei). Training reported 112,830.23 seconds (about 31 hours 21 minutes), with peak allocated GPU memory of 53.20 GiB. The final model achieved validation Hits@1/5/10 of 67.35% / 82.00% / 85.01%; Hits@10 is 1.40 percentage points above the Axolotl T5-Large result. The saved results and trainer state report no best checkpoint, so these metrics describe the final model at step 74,200. W&B tracking was offline. See [results/t5-3b-nq-rq3-suffix.json](results/t5-3b-nq-rq3-suffix.json).
 
 ### Validation: 10 beams, 15,572 queries
 
@@ -63,7 +65,7 @@ All values below are percentages. This matches the decoding budget used by the c
 | T5-base | Completed 10 epochs; checkpoint 70,000 | 54.69 | 74.65 | 78.85 |
 | T5-Large (Axolotl) | Completed 10 epochs; checkpoint 70,000 | 63.41 | 80.33 | 83.61 |
 | T5-Large (reference) | Completed 10 epochs; checkpoint 68,000 | 63.57 | 80.24 | 83.59 |
-| T5-3B | Full training in progress | — | — | — |
+| T5-3B | Completed 10 epochs; final model at step 74,200 | 67.35 | 82.00 | 85.01 |
 
 ### Held-out test: 7,830 queries
 
@@ -74,7 +76,7 @@ The saved reference T5-Large test evaluations use larger beam budgets; these are
 | T5-Large | 100 | 63.64 | 83.24 | 91.21 | 70.59 | 73.68 |
 | T5-Large | 300 | 63.69 | 83.21 | 91.17 | 70.62 | 73.69 |
 
-A 10-beam T5-Large test result was not found among the saved baseline artifacts. The current `evaluate` command uses 10 beams, so a direct test comparison requires evaluating every model with the same beam budget and split. T5-small, T5-base, and the Axolotl T5-Large have completed full training; their held-out test evaluations are pending.
+A 10-beam T5-Large test result was not found among the saved baseline artifacts. The current `evaluate` command uses 10 beams, so a direct test comparison requires evaluating every model with the same beam budget and split. T5-small, T5-base, the Axolotl T5-Large, and T5-3B have completed full training; their held-out test evaluations are pending.
 
 The reference run used the Transformers trainer in `t5_gr`; this repository uses Axolotl with the matched data and training schedule. Smaller models also use projected codebook embeddings, as described in [RQ embedding initialization](#rq-embedding-initialization). These implementation and initialization differences should remain explicit when reporting the comparison.
 
